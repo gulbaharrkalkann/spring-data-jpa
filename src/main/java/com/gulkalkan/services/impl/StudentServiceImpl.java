@@ -1,7 +1,9 @@
 package com.gulkalkan.services.impl;
 
+import com.gulkalkan.dto.DtoCourse;
 import com.gulkalkan.dto.DtoStudent;
 import com.gulkalkan.dto.DtoStudentIU;
+import com.gulkalkan.entities.Course;
 import com.gulkalkan.entities.Student;
 import com.gulkalkan.repository.StudentRepository;
 import com.gulkalkan.services.IStudentService;
@@ -32,15 +34,30 @@ public class StudentServiceImpl implements IStudentService {
 
     @Override
     public DtoStudent getStudentById(Integer id) {
-        DtoStudent dto=new DtoStudent();
-        Optional<Student> optional = studentRepository.findById(id);
-        if (optional.isPresent()) {
-            Student student = optional.get();
-            BeanUtils.copyProperties(student, dto);
-            return dto;
+
+        DtoStudent dtoStudent = new DtoStudent();
+        Optional<Student> optional=studentRepository.findById(id);
+        if (optional.isEmpty()){
+            return null;
         }
-        return null;
+        Student dbStudent =optional.get();
+        BeanUtils.copyProperties(dbStudent, dtoStudent);
+
+        if (dbStudent.getCourses()!=null&&!dbStudent.getCourses().isEmpty()){
+            for (Course course : dbStudent.getCourses()){
+                DtoCourse dtoCourse = new DtoCourse();
+                BeanUtils.copyProperties(course, dtoCourse);
+
+                dtoStudent.getCourses().add(dtoCourse);
+            }
+        }
+
+        return dtoStudent;
     }
+
+
+
+
 
     @Override
     public List<DtoStudent> getAllStudents() {
